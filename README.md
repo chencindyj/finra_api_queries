@@ -33,7 +33,7 @@ This package features the following 6 functions:
 * visualize_market_sentiment
 
 #### readthedocs Package Documentation
-https://readthedocs.org/projects/finra-api-queries/
+https://finra-api-queries.readthedocs.io/en/latest/
 
 #### Test PyPi Link
 https://test.pypi.org/project/finra-api-queries/
