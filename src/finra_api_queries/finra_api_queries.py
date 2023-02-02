@@ -293,6 +293,7 @@ def retrieve_dataset(dataset_name: str,
     # convert the filters input into the appropriate format for the API
     filters_list = [] # for exact matches
     comp_filters_list = [] # for comp values
+    comp_symbol = 0 # make fake value for com_symbol for now
 
     # if filters != {}:
     #     for i, j in filters.items():
@@ -303,8 +304,13 @@ def retrieve_dataset(dataset_name: str,
             # check that the value is only a length of one, because otherwise it is not a comparison filter
             if len(j) == 1:
                 for l in j:
-                    match = re.search(r'^([>=!<]+)\s(\d+)', l)
-                    comp_symbol = match.group(1)
+                    # check that the single entry includes a comparison
+                    try:
+                        match = re.search(r'^([>=!<]+)\s(\d+)', l)
+                        comp_symbol = match.group(1)
+                    except:
+                        pass
+                    
                 if comp_symbol in qualifiers:
                     comp_filters_list.append({'fieldName': i,
                                             'fieldValue': match.group(2),
