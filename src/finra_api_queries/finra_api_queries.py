@@ -795,6 +795,8 @@ def generate_market_participant_summary(my_access_token: str,
 
     column_to_sort: str
         Optional argument based on the column or the list of columns to sequentially sort the output table. Defaults to avg_weeklyShares.
+        The eight (8) options are 'avg_weeklyShares', 'sum_weeklyShares', 'avg_weeklyTradeCount', 'sum_weeklyTradeCount', 'percent_avg_shares',
+        'percent_total_shares', 'percent_avg_trades', and 'percent_total_trades'
 
     RETURNS
     -------
@@ -822,8 +824,16 @@ def generate_market_participant_summary(my_access_token: str,
     """
 
     # check that the column_to_sort input contains valid entries
-    if len(column_to_sort) > 1:
-        print("True")
+    sorting_options = ['avg_weeklyShares', 'sum_weeklyShares',
+                        'avg_weeklyTradeCount', 'sum_weeklyTradeCount',
+                        'percent_avg_shares', 'percent_total_shares',
+                        'percent_avg_trades','percent_total_trades']
+
+    if isinstance(column_to_sort, list) == False:
+        assert column_to_sort in sorting_options, "Please check the column_to_sort input as it must match at least one of the eight valid columns"
+    else:
+        for i in column_to_sort:
+            assert i in sorting_options, "Please check the column_to_sort input as it must match at least one of the eight valid columns"
 
     # retrieve data
     weekly_test = retrieve_dataset(dataset_name = 'weekly_summary',
@@ -838,17 +848,18 @@ def generate_market_participant_summary(my_access_token: str,
 
     # rename columns so there aren't two 
     grouped_weekly.columns = ['marketParticipantName', 'avg_weeklyShares', 'sum_weeklyShares', 'avg_weeklyTradeCount', 'sum_weeklyTradeCount']
-
+    
     # convert all column values into integers
     grouped_weekly[['avg_weeklyShares', 'avg_weeklyTradeCount']] = grouped_weekly[['avg_weeklyShares', 'avg_weeklyTradeCount']].astype(int)
 
+    # create new columns
+    grouped_weekly['percent_avg_shares'] = round(grouped_weekly['avg_weeklyShares'] / grouped_weekly['avg_weeklyShares'].sum() * 100, 2)
+    grouped_weekly['percent_total_shares'] = round(grouped_weekly['sum_weeklyShares'] / grouped_weekly['sum_weeklyShares'].sum() * 100, 2)
+    grouped_weekly['percent_avg_trades'] = round(grouped_weekly['avg_weeklyTradeCount'] / grouped_weekly['avg_weeklyTradeCount'].sum() * 100, 2)
+    grouped_weekly['percent_total_trades'] = round(grouped_weekly['sum_weeklyTradeCount'] / grouped_weekly['sum_weeklyTradeCount'].sum() * 100, 2)
+
     # sort the resulting data frame
     final_df = grouped_weekly.sort_values(column_to_sort, ascending = False).reset_index()
-
-    final_df['percent_avg_shares'] = round(final_df['avg_weeklyShares'] / final_df['avg_weeklyShares'].sum() * 100, 2)
-    final_df['percent_total_shares'] = round(final_df['sum_weeklyShares'] / final_df['sum_weeklyShares'].sum() * 100, 2)
-    final_df['percent_avg_trades'] = round(test_table['avg_weeklyTradeCount'] / final_df['avg_weeklyTradeCount'].sum() * 100, 2)
-    final_df['percent_total_trades'] = round(test_table['sum_weeklyTradeCount'] / final_df['sum_weeklyTradeCount'].sum() * 100, 2)
 
     # drop the excess index column
     final_df.drop('index', axis = 1, inplace = True)
