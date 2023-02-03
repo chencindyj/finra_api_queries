@@ -294,10 +294,6 @@ def retrieve_dataset(dataset_name: str,
     filters_list = [] # for exact matches
     comp_filters_list = [] # for comp values
     comp_symbol = 0 # make fake value for com_symbol for now
-    
-    # if filters != {}:
-    #     for i, j in filters.items():
-    #         filters_list.append({'fieldName': i, 'values': j})
 
     if (filters != {}):
         for i, j in filters.items():
@@ -442,7 +438,7 @@ def retrieve_dataset(dataset_name: str,
     
     return(response_df)
 
-def filter_by_weekly_stock(stock_keyword: str,
+def filter_market_participant(participant_keyword: str,
                             my_access_token: str,
                             rows_returned: int = 2000,
                             filtered_columns = [],
@@ -450,12 +446,12 @@ def filter_by_weekly_stock(stock_keyword: str,
                             date_filter = [{}]):
 
     """
-    Filter on the Weekly Summary data set by the stock ticker (like AAPL) or the full company name (Apple) using a fuzzy keyword match.
+    Filter on the Weekly Summary data set by the market participant using a fuzzy keyword match.
 
     PARAMETERS
     ----------
-    stock_keyword: str
-        A stock keyword such as the ticker name or a partial string of the company that informs the filtering of the issueSymbolIdentifier and issuerName columns.
+    participant_keyword: str
+        A keyword of the market participant that informs the filtering of the marketParticipantName column.
     
     my_access_token: str
         Access token generated from retrieve_api_token() function
@@ -485,30 +481,35 @@ def filter_by_weekly_stock(stock_keyword: str,
 
     EXAMPLES
     --------
-    >>> stock_keyword ='bed'
+    >>> participant_keyword ='goldman'
     >>> my_access_token = '12345abcd'
-    >>> output_1 = finra_api_queries.filter_by_weekly_stock(stock_keyword = stock_keyword, my_access_token = my_access_token)
+    >>> output_1 = finra_api_queries.filter_market_participant(participant_keyword = participant_keyword, my_access_token = my_access_token)
 
     >>> ouptut_1.head(n = 3)
-            totalWeeklyShareQuantity    issueSymbolIdentifier   issueName                           lastUpdateDate      lastReportDate
-    1141    45050                       BBBY                    Bed Bath & Beyond Inc. Common Stock 2018-06-11          2018-05-21
-    1527    2199366                     BBBY                    Bed Bath & Beyond Inc. Common Stock 2018-06-11          2018-05-25
+            totalWeeklyShareQuantity  issueSymbolIdentifier  lastUpdateDate      marketParticipantName
+    1141    462977                    BBBY                   2018-06-11          GOLDMAN SACHS & CO. LLC
+    1527    37848                     BBBY                   2018-05-25          GOLDMAN SACHS & CO. LLC
     """
 
     # check input
-    assert len(stock_keyword) > 0, "You must input a stock_keyword to use this function"
+    assert len(participant_keyword) > 0, "You must input a participant_keyword to use this function"
     
     # alter the stock keyword to lower case
-    stock_keyword = stock_keyword.lower()
+    participant_keyword = participant_keyword.upper()
 
     # retrieve data
-    weekly_test = retrieve_dataset(dataset_name = 'weekly_summary', my_access_token = my_access_token, rows_returned = rows_returned, filters = filters, filtered_columns = filtered_columns, date_filter = date_filter)
+    weekly_test = retrieve_dataset(dataset_name = 'weekly_summary',
+                                   my_access_token = my_access_token,
+                                   rows_returned = rows_returned,
+                                   filters = filters,
+                                   filtered_columns = filtered_columns,
+                                   date_filter = date_filter)
 
-    # create a subset where the two keyword columns are not null
-    non_null_df = weekly_test[(weekly_test['issueName'].isnull() == False) & (weekly_test['issueSymbolIdentifier'].isnull() == False)]
+    # create a subset where the market participant column is not null
+    non_null_df = weekly_test[(weekly_test['marketParticipantName'].isnull() == False)]
 
     # check for keyword in both columns
-    final_df = non_null_df[(non_null_df['issueSymbolIdentifier'].str.lower().str.contains(stock_keyword)) | (non_null_df['issueName'].str.lower().str.contains(stock_keyword))]
+    final_df = non_null_df[non_null_df['marketParticipantName'].str.upper().str.contains(participant_keyword)]
 
     assert len(final_df) > 0, "The keyword search did not yield any results."
 
@@ -757,3 +758,101 @@ def visualize_market_sentiment(dataset_name: str,
     axs[2].tick_params(axis = "y", labelsize = 8)
     
     return orig_df, fig
+
+
+def generate_market_participant_summary(my_access_token: str,
+                                        rows_returned: int = 2000,
+                                        filtered_columns = [],
+                                        filters: dict = {},
+                                        date_filter = [{}],
+                                        column_to_sort = 'avg_weeklyShares'):
+    
+    """
+    Summarize market participant activity in the Weekly Summary dataset aggregated by average and total trade and share counts.
+    It also provides information on the percentage (%) share of the market participants' activity compared to all participants in the defined
+    filters.  This output is then sorted according to criteria laid out in the input variable 'column_to_sort'.
+
+    PARAMETERS
+    ----------
+    my_access_token: str
+        Access token generated from retrieve_api_token() function
+
+    rows_returned: int
+        Rows returned by the query. Defaults to 2000 rows, though you should be cognizant of your API data quota.
+
+    filtered_columns: list
+        Optional. List of the specific columns to return in the data frame.
+        Run show_filterable_columns() based on the dataset name to see eligible columns for filtering.
+    
+    filters: dictionary
+        Optional. Filter the data set on one or more values; multiple column filters are possible, and you can also filter on values using
+        simple quantifiers like >, <, <=, >=, ==, and !=.
+        The input is different from the API based on field name as the key and the list of filtered values as the dictionary values.
+        Filter values must be an exact match since the filter is applied to the API query and is not filter that's applied subsequent the API call.
+
+    date_filter: dictionary within a list
+        Optional argument if dates should be filtered by a certain date range for a date-related column.  Input follows the API input convention.
+        Follows the convention [{'startDate': 'YYYY-MM-DD', 'endDate': 'YYYY-MM-DD', 'fieldName': 'DATECOLUMN'}]
+
+    column_to_sort: str
+        Optional argument based on the column or the list of columns to sequentially sort the output table. Defaults to avg_weeklyShares.
+
+    RETURNS
+    -------
+    pandas.DataFrame
+        Data frame
+
+    EXAMPLES
+    --------
+    >>> my_access_token = '12345abcd'
+    >>> column_to_sort_input = ['avg_weeklyShares', 'sum_weeklyShares']
+    >>> output_1 = finra_api_queries.generate_market_participant_summary(my_access_token = my_access_token,
+                                                                         column_to_sort = column_to_sort_input)
+
+    >>> output_1.head(n = 4)
+        marketParticipantName                avg_weeklyShares    sum_weeklyShares    avg_weeklyTradeCount    sum_weeklyTradeCount   
+    1   JANE STREET EXECUTION SERVICES, LLC  67820273            67820273            1043                    1043
+    2   De Minimis Firms                     1246017             124601714           1829                    182989
+    3   CITADEL SECURITIES LLC               979667              44085032            441                     199862
+
+        percent_avg_shares      percent_total_shares        percent_avg_trades      percent_total_trades
+    1   88.71                   17.66                       2.72                    0.10
+    2   1.63                    32.45                       4.76                    17.48
+    3   1.28                    11.48                       11.56                   19.09
+    """
+
+    # check that the column_to_sort input contains valid entries
+    if len(column_to_sort) > 1:
+        print("True")
+
+    # retrieve data
+    weekly_test = retrieve_dataset(dataset_name = 'weekly_summary',
+                                   my_access_token = my_access_token,
+                                   rows_returned = rows_returned,
+                                   filters = filters,
+                                   filtered_columns = filtered_columns,
+                                   date_filter = date_filter)
+
+    # group the information by market participant and create the four desired metrics
+    grouped_weekly = weekly_test.groupby('marketParticipantName').agg({'totalWeeklyShareQuantity':['mean', 'sum'], 'totalWeeklyTradeCount': ['mean', 'sum']}).reset_index()
+
+    # rename columns so there aren't two 
+    grouped_weekly.columns = ['marketParticipantName', 'avg_weeklyShares', 'sum_weeklyShares', 'avg_weeklyTradeCount', 'sum_weeklyTradeCount']
+
+    # convert all column values into integers
+    grouped_weekly[['avg_weeklyShares', 'avg_weeklyTradeCount']] = grouped_weekly[['avg_weeklyShares', 'avg_weeklyTradeCount']].astype(int)
+
+    # sort the resulting data frame
+    final_df = grouped_weekly.sort_values(column_to_sort, ascending = False).reset_index()
+
+    final_df['percent_avg_shares'] = round(final_df['avg_weeklyShares'] / final_df['avg_weeklyShares'].sum() * 100, 2)
+    final_df['percent_total_shares'] = round(final_df['sum_weeklyShares'] / final_df['sum_weeklyShares'].sum() * 100, 2)
+    final_df['percent_avg_trades'] = round(test_table['avg_weeklyTradeCount'] / final_df['avg_weeklyTradeCount'].sum() * 100, 2)
+    final_df['percent_total_trades'] = round(test_table['sum_weeklyTradeCount'] / final_df['sum_weeklyTradeCount'].sum() * 100, 2)
+
+    # drop the excess index column
+    final_df.drop('index', axis = 1, inplace = True)
+
+    assert len(final_df) > 0, "The keyword search did not yield any results."
+
+    return final_df
