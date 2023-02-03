@@ -814,6 +814,7 @@ def generate_market_participant_summary(my_access_token: str,
     2   De Minimis Firms                     1246017             124601714           1829                    182989
     3   CITADEL SECURITIES LLC               979667              44085032            441                     199862
 
+    >>>  output_1.head(n = 4) ..cont
         percent_avg_shares      percent_total_shares        percent_avg_trades      percent_total_trades
     1   88.71                   17.66                       2.72                    0.10
     2   1.63                    32.45                       4.76                    17.48
