@@ -220,7 +220,7 @@ def retrieve_dataset(dataset_name: str,
     >>> my_access_token = "ABCDFGH545645645645648797212630"
     >>> rows_returned = 200
     >>> filtered_columns_input = ['lastUpdateDate', 'averageTradeSize', 'crdFirmName']
-    >>> filters_input = filters= {'crdFirmName': ['CITADEL SECURITIES LLC', 'SIDOTI & COMPANY, LLC'],
+    >>> filters_input = {'crdFirmName': ['CITADEL SECURITIES LLC', 'SIDOTI & COMPANY, LLC'],
                                   'averageTradeSize': ['>= 20'],
                                   'averageTradeSizeRank': ['!= 100']}
     >>> date_filter_inputs = [{'startDate': '2020-04-01', 'endDate': '2021-03-01', 'fieldName': 'lastUpdateDate'}]
@@ -294,12 +294,14 @@ def retrieve_dataset(dataset_name: str,
     filters_list = [] # for exact matches
     comp_filters_list = [] # for comp values
     comp_symbol = 0 # make fake value for com_symbol for now
-
-    if (filters != {}):
+    
+    if (filters != {}): # if the filters list is not empty
         for i, j in filters.items():
+
             # check that the value is only a length of one, because otherwise it is not a comparison filter
-            if len(j) == 1:
+            if len(j) == 1: # if the filter only has one entry (as comp filters would have)
                 for l in j:
+                    comp_symbol = 0 # make fake value for com_symbol for now
                     # check that the single entry includes a comparison
                     try:
                         match = re.search(r'^([>=!<]+)\s(\d+)', l)
@@ -307,12 +309,12 @@ def retrieve_dataset(dataset_name: str,
                     except:
                         pass
 
-                if comp_symbol in qualifiers:
-                    comp_filters_list.append({'fieldName': i,
-                                                'fieldValue': match.group(2),
-                                                'compareType': qualifiers[comp_symbol]})
-                else:
-                    filters_list.append({'fieldName': i, 'values': j}) # add entry to the filters_list
+                    if comp_symbol in qualifiers.keys():
+                        comp_filters_list.append({'fieldName': i,
+                                                    'fieldValue': match.group(2),
+                                                    'compareType': qualifiers[comp_symbol]})
+                    else:
+                        filters_list.append({'fieldName': i, 'values': j}) # add entry to the filters_list
             else:
                 filters_list.append({'fieldName': i, 'values': j}) # add entry to the filters_list
 

@@ -4,53 +4,7 @@ import requests
 import pandas as pd
 import re
 
-
-def retrieve_api_token(finra_api_key_input: str = "",
-                        finra_api_secret_input: str = ""):
-                
-    """
-    Load credentials to access FINRA API token.
-
-    Parameters
-    ----------
-    finra_api_key_input: str
-        API Key supplied by FINRA API.
-        Create an account using: https://developer.finra.org/docs#getting_started-the_api_console
-    
-    finra_api_secret_input: str
-        API Secret supplied by FINRA API.
-        Generate the secret/password using: https://developer.finra.org/docs#getting_started-the_api_console
-
-    Returns
-    -------
-    FINRA-API generated access token: str
-
-    Example
-    -------
-    >>> finra_api_key = 'abcdj3478wh'
-    >>> finra_api_secret = "th1s1smyp@ss"
-    >>> retrieve_api_token(finra_api_key_input = finra_api_key, finra_api_secret_input = finra_api_secret)
-    '*AAHDFKNBSDIGJ324u328947u32hnfkjhfiwhfe28r93u12io4j31lkj4kl123129msi327833'
-    """
-
-    try:
-        load_dotenv()
-        finra_api_key = os.getenv('FINRA_API_CLIENT')
-        finra_api_secret = os.getenv('SECRET')
-    
-    except:
-        finra_api_key = finra_api_key_input
-        finra_api_secret = finra_api_secret_input
-        
-    my_token = requests.post('https://ews.fip.finra.org/fip/rest/ews/oauth2/access_token?grant_type=client_credentials',
-                            auth = (finra_api_key, finra_api_secret))
-
-    assert my_token.status_code == 200, "Access Token could not be generated"
-
-    global my_access_token
-    my_access_token = my_token.json()['access_token']
-
-    return my_access_token
+my_access_token2 = '*AAJTSQACMDIABHR5cGUAA0pXVAACUzEAAjAx*eyJ0eXAiOiJKV1QiLCJjdHkiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.ZXlKMGVYQWlPaUpLVjFRaUxDSmxibU1pT2lKQk1USTRRMEpETFVoVE1qVTJJaXdpWVd4bklqb2laR2x5SW4wLi4xTk9PLTZEckhzNEljLWg1TDJCLU9nLkNEQWJPY2xQRHJEM1RnRmJjOUUtWjVVQVpieGpuc2QxVFFha3h2WmhlZFcydm5fblFVWmZsMmVLbWdHZVRQeHprVWFYT3hRenY5SE90cEhRTHY2U1FIRDJaME43bGtYMVp5Mm9US1J1eVI3MUdPZ2twZUVDM2xJOElMU2YwM3YxY0tOMHZXVnpsdDN3ei1Ua2lzXzhaNEZYVThzVFlaZEo2OXNpV3lWMDl3TWIyZXRTQndQM2tqVXhWdFNmeThadDl1cUdUY1lZX3F5TUVGdWVISnh2MnVDVXZtX0JOY1U4ckpSLW5ydnZDSFBqa0dyU1BrS0JCVVZ5TVNCUlluX0dWQjdvZFo5ZGRCQWs1NlFZRm9iZUg3WkgwdkVkMlY5bkJKT1dOaTUzWW1WX05hQ045WmtvY2pkU0dmVC1Wc194WHF1UWRkQl8zUk1STllqZ0E3c2l4eHVVUG00YXk3SDNkbndQMUwzTzFUUFV0b1pYZE81Z29FdXY0OGNTeDBYVlZRTTh5VTJoZGhKOG1PS2dYd1Y1ZHFLVkZocGxEUURSM0pzVmNkY05QTldveHk5XzdYeFRCMHd3cndKNzF5MVBjZEc0UmdnT0RnZ2Mzc3JkekUyeGIwOE5fMjhEYXhrQnI5MnVuV2t5b3RLNUxodlpxZzYxQlZDeDk2SmFNcjNuUjNWSW9WdVotY3A1VU9nNzdBS2RkSjZNb0dyOXBDUUt3SDJZR2tZdzJkRUlqZWVpcHpJSmh5MFJDMnRWMHhaU0ltOTV5T29RaUJLSjhJNFZtM2FNRTFQbWRWcTd3ekRSQ29HRkh6US05V2sxS0tRVmdCZ2JZcTg4bFZBOS1QOEJRLVE3am52Vjk4SU8wTzMyZjI0SEh0ajU5MWZtY2FxVTg0TFJxWUZaMHVWNlJ1OHBabm1JZU91TG1lYWE2b2NuSHYwbzU5N0JRTm9KN0g3anJFSF9aSTNLSGhqN3BnODd3eGRJa1FLQUxhU0pWU2o5ZU1LeldqeEpqRk4xeDZZWjBVSzFybG9GeGxQcUVCT0RwNm9hUm9xRlgwVkpMVEpic3FIWFR3d3RmOG0wcEdTRmRMZGxQM0ZVZ2xCNjcwRHl0MzdpbVZzSWZySmdOanpjY0l4RjVRcjBpZGtSQ2N2RDdqY3Npblo5Qkp2dTJCM2R6cGFpU3dJLU1PaGVZMlZKdHhuUkR6dF9KVkhJekVVMk5zcVZoRnQ4S05BTmNTUFJyYkVobGg1Rl9NdEF0TmNKTUFERndjVU9xZU8wOUR3ZmdORV8xVGQ5UDhUS1ZZbjV3MFdVNlE1MFotcS1XaUdqUkhlWVdPeUZjWUliaEpuSFVKZzJpbUxiWVI5NV9SSF83ZUZpRXo2NXNmMXp5UzdOVjNJbUNneVVWY2FGVXNaWkgzczB6bm0yYmd3SlVpekZIQ3d0VmJGczFQUlVhVHRXTnd3UTFIRXowQU1ZTEdoRUZjcTZRSm5PUWxYR3hhR1pxbHpDRVBqM0ZWWEtMazVZUTRNR1JsNmJLX3FoVk1XTFJ3dFVPMDNkWnptc1o3U010VlU0cjYtVDF5UnBRRVBXOEFjQnQtNEJXM2VxcW9pWVhxQ2NTcmJTc0E5MzMzOG42b1p5OXNjNDhWUWVlcHZ4aWVydlR4c183QktpOWVYQ2ptTng0cHNnZ1pIV05td0EtcTlKeXRCeVBhNGxwakFTYVpBWk1zWnBmb256LV9MYUZRalhENDBoazMtNHJ3RDNWaGtrLUYzc0t2X3hZZ01EcGRXNjVEWWxFNXhfN0JXWmJnSy1GOUdrRmxPUE5MclpUaHZ6b2dwV3dUV0dOLWxiYWRfbWZ3dUhGak5zam03bktLSGxXV1Bnek1zREdFaTlSSHBnOThfWHQwUVlHT3FvQU8zMHBQWmlxc1l4Q0FXaDFhS3dZc0t1T1ZTSHRBLUdiVGFzcWEtaEhNOUJtUl9lelQyaDNwOFo0enkxR3hGcjBnQnNRWDdPSmFyOFRIZU9fOWZhN3N2bGx0VjFLMzBBVjhoMk5pNWJSLWZfei1QVi4xTnBHMDQ4OUpGQmt5M1JReGNPdkN3.5dFd117uy2REl-Xo1gBSscA0cLuQDzw1keAPi8aKu-w'
 
 def show_filterable_columns(dataset_name: str,
                             my_access_token: str):
@@ -294,14 +248,12 @@ def retrieve_dataset(dataset_name: str,
     filters_list = [] # for exact matches
     comp_filters_list = [] # for comp values
     comp_symbol = 0 # make fake value for com_symbol for now
-    
-    if (filters != {}): # if the filters list is not empty
-        for i, j in filters.items():
 
+    if (filters != {}):
+        for i, j in filters.items():
             # check that the value is only a length of one, because otherwise it is not a comparison filter
-            if len(j) == 1: # if the filter only has one entry (as comp filters would have)
+            if len(j) == 1:
                 for l in j:
-                    comp_symbol = 0 # make fake value for com_symbol for now
                     # check that the single entry includes a comparison
                     try:
                         match = re.search(r'^([>=!<]+)\s(\d+)', l)
@@ -309,12 +261,12 @@ def retrieve_dataset(dataset_name: str,
                     except:
                         pass
 
-                    if comp_symbol in qualifiers.keys():
-                        comp_filters_list.append({'fieldName': i,
-                                                    'fieldValue': match.group(2),
-                                                    'compareType': qualifiers[comp_symbol]})
-                    else:
-                        filters_list.append({'fieldName': i, 'values': j}) # add entry to the filters_list
+                if comp_symbol in qualifiers:
+                    comp_filters_list.append({'fieldName': i,
+                                              'fieldValue': match.group(2),
+                                              'compareType': qualifiers[comp_symbol]})
+                else:
+                    filters_list.append({'fieldName': i, 'values': j}) # add entry to the filters_list
             else:
                 filters_list.append({'fieldName': i, 'values': j}) # add entry to the filters_list
 
@@ -490,14 +442,14 @@ def filter_market_participant(participant_keyword: str,
     >>> ouptut_1.head(n = 3)
             totalWeeklyShareQuantity  issueSymbolIdentifier  lastUpdateDate      marketParticipantName
     1141    462977                    BBBY                   2018-06-11          GOLDMAN SACHS & CO. LLC
-    1527    37848  
+    1527    37848                     BBBY                   2018-05-25          GOLDMAN SACHS & CO. LLC
     """
 
     # check input
-    assert len(participant_keyword) > 0, "You must input a stock_keyword to use this function"
+    assert len(participant_keyword) > 0, "You must input a participant_keyword to use this function"
     
     # alter the stock keyword to lower case
-    participant_keyword = participant_keyword.lower()
+    participant_keyword = participant_keyword.upper()
 
     # retrieve data
     weekly_test = retrieve_dataset(dataset_name = 'weekly_summary',
@@ -507,8 +459,8 @@ def filter_market_participant(participant_keyword: str,
                                    filtered_columns = filtered_columns,
                                    date_filter = date_filter)
 
-    # create a subset where the two keyword columns are not null
-    non_null_df = weekly_test[weekly_test['marketParticipantName'].isnull() == False]
+    # create a subset where the market participant column is not null
+    non_null_df = weekly_test[(weekly_test['marketParticipantName'].isnull() == False)]
 
     # check for keyword in both columns
     final_df = non_null_df[non_null_df['marketParticipantName'].str.upper().str.contains(participant_keyword)]
@@ -869,3 +821,24 @@ def generate_market_participant_summary(my_access_token: str,
     assert len(final_df) > 0, "The keyword search did not yield any results."
 
     return final_df
+    
+# def test_retrieve_api_token():
+#     assert len(retrieve_api_token(finra_api_key, finra_api_secret)) > 1, "retrieve_api_token() function doesn't work correctly"
+
+def test_show_filterable_columns():
+    assert len(show_filterable_columns('finra_registered_firms', my_access_token = my_access_token2)) > 1, "show_filterable_columns() function doesn't work correctly"
+
+def test_retrieve_dataset():
+    assert len(retrieve_dataset('fixed_income_corpdebt_marketsentiment', my_access_token = my_access_token2, rows_returned = 5)) > 0, "retrieve_dataset() function doesn't work correctly"
+
+def test_filter_market_participant():
+    assert len(filter_market_participant('a', my_access_token = my_access_token2)) > 0, "filter_by_weekly_stock() function doesn't work"
+
+def test_summarize_trading_breadth():
+    assert len(summarize_trading_breadth('fixed_income_rule144a_marketbreadth', my_access_token = my_access_token2, rows_returned = 5)) > 0, "summarize_trading_breadth() function doesn't work"
+
+def test_visualize_market_sentiment():
+    assert len(visualize_market_sentiment('fixed_income_corpdebt_marketsentiment', my_access_token = my_access_token2, rows_returned = 50, x_axis = 'tradeType')) > 0, "visualize_market_sentiment() function doesn't work"
+
+def test_generate_market_participant_summary():
+    assert len(generate_market_participant_summary(my_access_token = my_access_token2)) > 0, "generate_market_participant_summary doesn't work"
