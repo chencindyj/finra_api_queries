@@ -220,7 +220,7 @@ def retrieve_dataset(dataset_name: str,
     >>> my_access_token = "ABCDFGH545645645645648797212630"
     >>> rows_returned = 200
     >>> filtered_columns_input = ['lastUpdateDate', 'averageTradeSize', 'crdFirmName']
-    >>> filters_input = filters= {'crdFirmName': ['CITADEL SECURITIES LLC', 'SIDOTI & COMPANY, LLC'],
+    >>> filters_input = {'crdFirmName': ['CITADEL SECURITIES LLC', 'SIDOTI & COMPANY, LLC'],
                                   'averageTradeSize': ['>= 20'],
                                   'averageTradeSizeRank': ['!= 100']}
     >>> date_filter_inputs = [{'startDate': '2020-04-01', 'endDate': '2021-03-01', 'fieldName': 'lastUpdateDate'}]
