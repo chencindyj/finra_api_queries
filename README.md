@@ -23,14 +23,15 @@ $ from finra_api_queries import finra_api_queries
 3. Use the various functions to easily extract data sets from the FINRA Query API with a variety of parameters, visualize time series data, as well as filter and aggregate data in pandas data frames and Seaborn plots.
 4. Use API to glean time series-related and aggregated insights about fixed income activity and trading block activity.
 
-This package features the following 6 functions:
+This package features the following 7 functions:
 
 * retrieve_api_token
 * show_filterable_columns
 * retrieve_dataset
-* filter_by_weekly_stock
+* filter_market_participant
 * summarize_trading_breadth
 * visualize_market_sentiment
+* generate_market_participant_summary
 
 #### readthedocs Package Documentation
 https://finra-api-queries.readthedocs.io/en/latest/
