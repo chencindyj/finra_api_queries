@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "finra_api_queries"
-version = "0.10.0"
+version = "1.1.0"
 description = "An API wrapper for FINRA's Query API"
 authors = ["Cindy Chen"]
 license = "MIT"

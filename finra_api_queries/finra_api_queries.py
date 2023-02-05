@@ -309,8 +309,8 @@ def retrieve_dataset(dataset_name: str,
 
                 if comp_symbol in qualifiers:
                     comp_filters_list.append({'fieldName': i,
-                                            'fieldValue': match.group(2),
-                                            'compareType': qualifiers[comp_symbol]})
+                                                'fieldValue': match.group(2),
+                                                'compareType': qualifiers[comp_symbol]})
                 else:
                     filters_list.append({'fieldName': i, 'values': j}) # add entry to the filters_list
             else:
