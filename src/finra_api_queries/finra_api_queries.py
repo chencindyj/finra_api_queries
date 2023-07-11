@@ -429,7 +429,7 @@ def retrieve_dataset(dataset_name: str,
             response = requests.post(f'https://api.finra.org/data/group/{eligible_groups[dataset_name]}/name/{eligible_datasets[dataset_name]}?limit={rows_returned}',
                                 headers = {'Authorization': 'Bearer ' + my_access_token,
                                            'Accept': 'application/json'},
-                                json = {'fields': filtered_columns,
+                                json = {'domainFilters': filters_list,
                                         'compareFilters': comp_filters_list,
                                           'dateRangeFilters': date_filter,
                                           'limit': rows_returned})
